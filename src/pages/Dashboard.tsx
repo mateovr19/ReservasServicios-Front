@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { LayoutDashboard, Calendar, Settings, LogOut, User, Search, Bell } from 'lucide-react';
 import './Dashboard.css';
 
