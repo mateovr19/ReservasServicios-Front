@@ -7,7 +7,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(() => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
-    return token && role ? { accessToken: token, role } : null;
+    const nombre = localStorage.getItem('nombre');
+    return token && role ? { accessToken: token, role, nombre: nombre || undefined } : null;
   });
   const loading = false;
 

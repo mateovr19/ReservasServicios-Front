@@ -17,7 +17,7 @@ const Dashboard: React.FC = () => {
         <div className="sidebar-header">
           <div className="logo">
             <span className="logo-icon"></span>
-            <span className="logo-text">Finnger</span>
+            <span className="logo-text">{user?.nombres_usuario || user?.role}</span>
           </div>
         </div>
         
@@ -58,9 +58,8 @@ const Dashboard: React.FC = () => {
           <div className="header-actions">
             <button className="icon-btn"><Bell size={20} /></button>
             <div className="user-profile">
-              <div className="avatar">{user?.role?.charAt(0)}</div>
-              <div className="user-info">
-                <p className="user-role">{user?.role}</p>
+              <div className="avatar">
+                {user?.nombres_usuario ? user.nombres_usuario.charAt(0) : user?.role?.charAt(0)}
               </div>
             </div>
           </div>
@@ -68,7 +67,7 @@ const Dashboard: React.FC = () => {
 
         <section className="dashboard-content">
           <div className="welcome-banner">
-            <h1>¡Hola de nuevo!</h1>
+            <h1>¡Hola de nuevo{user?.nombres_usuario ? `, ${user.nombres_usuario}` : `, ${user?.role}`}!</h1>
             <p>Bienvenido a tu panel de control de {user?.role === 'PROVEEDOR' ? 'Proveedor' : 'Cliente'}.</p>
           </div>
 

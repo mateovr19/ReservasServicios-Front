@@ -3,6 +3,7 @@ export interface AuthenticationResponse {
   tokenType: string;
   expiresIn: number;
   role: string;
+  nombres_usuario?: string;
 }
 
 export interface ApiResponse<T> {
@@ -14,6 +15,7 @@ export interface ApiResponse<T> {
 export interface User {
   accessToken: string;
   role: 'CLIENTE' | 'PROVEEDOR' | string;
+  nombres_usuario?: string;
 }
 
 export interface ErrorResponse {
