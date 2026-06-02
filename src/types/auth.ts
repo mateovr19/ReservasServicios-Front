@@ -13,9 +13,11 @@ export interface ApiResponse<T> {
 }
 
 export interface User {
+  id?: number;
   accessToken: string;
   role: 'CLIENTE' | 'PROVEEDOR' | string;
   nombres_usuario?: string;
+  correo?: string;
 }
 
 export interface ErrorResponse {
@@ -24,3 +26,4 @@ export interface ErrorResponse {
   details?: string[];
   traceId: string;
 }
+

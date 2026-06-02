@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import './LoginPage.css';
 import illustration from '../assets/login-illustration.jpg';
@@ -44,14 +44,14 @@ const LoginPage: React.FC = () => {
           </header>
 
           <main className="login-form-section">
-            <h1 className="welcome-title">Hello,<br />Welcome</h1>
-            <p className="welcome-subtitle">Welcome back to your special place of reservations</p>
+            <h1 className="welcome-title">Hola,<br />Bienvenido</h1>
+            <p className="welcome-subtitle">Bienvenido de nuevo a tu plataforma de reservas</p>
 
             <form className="login-form" onSubmit={handleSubmit}>
               <div className="form-group">
                 <input
                   type="email"
-                  placeholder="stanley@gmail.com"
+                  placeholder="ejemplo@correo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -70,20 +70,20 @@ const LoginPage: React.FC = () => {
               <div className="form-options">
                 <label className="remember-me">
                   <input type="checkbox" />
-                  <span>Remember me</span>
+                  <span>Recordarme</span>
                 </label>
-                <a href="#" className="forgot-password">Forgot Password?</a>
+                <a href="#" className="forgot-password">¿Olvidaste tu contraseña?</a>
               </div>
 
               {error && <p className="error-message">{error}</p>}
 
               <button type="submit" className="signin-button" disabled={loading}>
-                {loading ? 'Signing In...' : 'Sign In'}
+                {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
               </button>
             </form>
 
             <footer className="form-footer">
-              <p>Don't have an account? <a href="#" className="signup-link">Sign Up</a></p>
+              <p>¿No tienes una cuenta? <Link to="/register" className="signup-link">Regístrate</Link></p>
             </footer>
           </main>
         </div>
