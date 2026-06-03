@@ -78,6 +78,68 @@ interface GeneralScheduleDay {
   horaFin: string;
 }
 
+interface RawBookingData {
+  bookingId?: number;
+  idReserva?: number;
+  id?: number;
+  serviceId?: number;
+  idServicio?: number;
+  serviceName?: string;
+  nombreServicio?: string;
+  availabilityId?: number;
+  idDisponibilidad?: number;
+  slotDate?: string;
+  fechaReserva?: string;
+  fecha?: string;
+  startTime?: string;
+  horaInicio?: string;
+  endTime?: string;
+  horaFin?: string;
+  customerId?: number;
+  idCliente?: number;
+  customerFullName?: string;
+  nombreCliente?: string;
+  customerEmail?: string;
+  correoCliente?: string;
+  bookingStatus?: string;
+  estadoReserva?: string;
+  estado?: string;
+  createdAt?: string;
+  fechaCreacion?: string;
+  providerId?: number;
+  idProveedor?: number;
+  providerFullName?: string;
+  nombreProveedor?: string;
+}
+
+interface RawAvailabilityData {
+  availabilityId?: number;
+  idDisponibilidad?: number;
+  startTime?: string;
+  horaInicio?: string;
+  endTime?: string;
+  horaFin?: string;
+  remainingSlots?: number | null;
+  cuposDisponibles?: number;
+  fecha?: string;
+}
+
+interface RawOfferData {
+  serviceId?: number;
+  idServicio?: number;
+  id?: number;
+  serviceName?: string;
+  nombreServicio?: string;
+  nombre?: string;
+  serviceDescription?: string;
+  descripcion?: string;
+  providerName?: string;
+  nombreProveedor?: string;
+  providerId?: number;
+  idProveedor?: number;
+  providerUserId?: number;
+}
+
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
   
@@ -139,8 +201,8 @@ const Dashboard: React.FC = () => {
   const fetchProviderBookings = useCallback(async () => {
     try {
       const response = await api.get('/api/v1/providers/me/bookings');
-      const rawData: any[] = response.data?.data || [];
-      const normalizedData = rawData.map((item: any) => ({
+      const rawData: RawBookingData[] = response.data?.data || [];
+      const normalizedData = rawData.map((item: RawBookingData) => ({
         bookingId: item.bookingId || item.idReserva || item.id,
         serviceId: item.serviceId || item.idServicio,
         serviceName: item.serviceName || item.nombreServicio || 'Servicio Reservado',
@@ -163,8 +225,8 @@ const Dashboard: React.FC = () => {
   const fetchClientBookings = useCallback(async () => {
     try {
       const response = await api.get('/api/v1/bookings/me');
-      const rawData: any[] = response.data?.data || [];
-      const normalizedData = rawData.map((item: any) => ({
+      const rawData: RawBookingData[] = response.data?.data || [];
+      const normalizedData = rawData.map((item: RawBookingData) => ({
         bookingId: item.bookingId || item.idReserva || item.id,
         serviceId: item.serviceId || item.idServicio,
         serviceName: item.serviceName || item.nombreServicio || 'Servicio Reservado',
@@ -189,8 +251,8 @@ const Dashboard: React.FC = () => {
         `/api/v1/providers/${providerId}/services/${serviceId}/availabilities`,
         { params: { date: availDate } }
       );
-      const rawData: any[] = response.data?.data || [];
-      const normalizedData = rawData.map((item: any) => ({
+      const rawData: RawAvailabilityData[] = response.data?.data || [];
+      const normalizedData = rawData.map((item: RawAvailabilityData) => ({
         availabilityId: item.availabilityId || item.idDisponibilidad,
         startTime: item.startTime || item.horaInicio || '00:00:00',
         endTime: item.endTime || item.horaFin || '00:00:00',
@@ -209,8 +271,8 @@ const Dashboard: React.FC = () => {
   const fetchOffers = useCallback(async () => {
     try {
       const response = await api.get('/api/v1/offers');
-      const rawData: any[] = response.data?.data || [];
-      const normalizedOffers = rawData.map((item: any) => ({
+      const rawData: RawOfferData[] = response.data?.data || [];
+      const normalizedOffers = rawData.map((item: RawOfferData) => ({
         serviceId: item.serviceId || item.idServicio || item.id,
         serviceName: item.serviceName || item.nombreServicio || item.nombre || 'Servicio sin nombre',
         serviceDescription: item.serviceDescription || item.descripcion || 'Sin descripción',
@@ -225,25 +287,29 @@ const Dashboard: React.FC = () => {
 
   // Fetch initial data based on role
   useEffect(() => {
-    if (user) {
-      if (user.role === 'PROVEEDOR') {
-        fetchProviderBookings();
-        // Load services from local storage since backend has no GET for provider's services
-        const savedServices = localStorage.getItem(`services_${user.correo}`);
-        if (savedServices) {
-          setMyServices(JSON.parse(savedServices));
-        }
-        // Load schedule from local storage or backend if available
-        const savedSchedule = localStorage.getItem(`schedule_${user.correo}`);
-        if (savedSchedule) {
-          setGeneralSchedule(JSON.parse(savedSchedule));
-        }
-      } else if (user.role === 'CLIENTE') {
-        fetchClientBookings();
-        fetchOffers();
+    if (user?.role === 'PROVEEDOR') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchProviderBookings();
+      // Load services from local storage since backend has no GET for provider's services
+      const savedServices = localStorage.getItem(`services_${user.correo}`);
+      if (savedServices) {
+        setMyServices(JSON.parse(savedServices));
+      }
+      // Load schedule from local storage or backend if available
+      const savedSchedule = localStorage.getItem(`schedule_${user.correo}`);
+      if (savedSchedule) {
+        setGeneralSchedule(JSON.parse(savedSchedule));
       }
     }
-  }, [user, fetchProviderBookings, fetchClientBookings, fetchOffers]);
+  }, [user?.role, user?.correo, fetchProviderBookings]);
+
+  useEffect(() => {
+    if (user?.role === 'CLIENTE') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchClientBookings();
+      fetchOffers();
+    }
+  }, [user?.role, fetchClientBookings, fetchOffers]);
 
   // Save general schedule
   const handleUpdateSchedule = async (day: string, start: string, end: string) => {
@@ -288,7 +354,7 @@ const Dashboard: React.FC = () => {
         capacidadMaximaConcurrente: newServiceCapacity
       });
 
-      const backendSrv = response.data.data as any;
+      const backendSrv = response.data.data as RawBookingData;
       const newService: ServiceItem = {
         idServicio: backendSrv.serviceId || backendSrv.idServicio || backendSrv.id || Date.now(),
         nombre: backendSrv.nombre || backendSrv.serviceName || newServiceName,
@@ -372,7 +438,7 @@ const Dashboard: React.FC = () => {
         }
       );
 
-      const backendData = response.data.data as any;
+      const backendData = response.data.data as RawAvailabilityData;
       const newAvail: Availability = {
         availabilityId: backendData.availabilityId || backendData.idDisponibilidad || Date.now(),
         startTime: backendData.startTime || backendData.horaInicio || formattedStart,
@@ -454,7 +520,7 @@ const Dashboard: React.FC = () => {
 
     try {
       const batchSize = 5; // Scan 5 providers at a time
-      let foundData: any[] | null = null;
+      let foundData: RawAvailabilityData[] | null = null;
       let foundProviderId = 1;
 
       // Scan IDs from 1 to 30
@@ -464,14 +530,14 @@ const Dashboard: React.FC = () => {
           const pid = batch * batchSize + i;
           promises.push(
             api.get(`/api/v1/providers/${pid}/services/${serviceId}/availabilities`, { params: { date } })
-               .then(res => ({ pid, data: res.data?.data || [] }))
+               .then(res => ({ pid, data: (res.data?.data || []) as RawAvailabilityData[] }))
                .catch(() => null)
           );
         }
-        
+
         const results = await Promise.all(promises);
         const successful = results.find(r => r && r.data && r.data.length > 0);
-        
+
         if (successful) {
           foundData = successful.data;
           foundProviderId = successful.pid;
@@ -481,7 +547,7 @@ const Dashboard: React.FC = () => {
 
       if (foundData) {
         setCurrentProviderId(foundProviderId); // Save the correct ID for booking
-        const normalizedData = foundData.map((item: any) => ({
+        const normalizedData = foundData.map((item: RawAvailabilityData) => ({
           availabilityId: item.availabilityId || item.idDisponibilidad,
           startTime: item.startTime || item.horaInicio || '00:00:00',
           endTime: item.endTime || item.horaFin || '00:00:00',
@@ -492,7 +558,7 @@ const Dashboard: React.FC = () => {
       } else {
         setAvailableSlots([]);
       }
-    } catch (err: unknown) {
+    } catch {
       setError('Error al escanear horarios disponibles.');
       setAvailableSlots([]);
     } finally {
@@ -503,6 +569,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (selectedOffer && bookingDate) {
       // Usar el escáner en lugar del ID directo
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchAvailableSlots(selectedOffer.serviceId, bookingDate);
     }
   }, [selectedOffer, bookingDate]);
@@ -568,8 +635,8 @@ const Dashboard: React.FC = () => {
         `/api/v1/providers/${providerId}/services/${serviceId}/availabilities`,
         { params: { date } }
       );
-      const rawData: any[] = response.data.data || [];
-      const normalizedData = rawData.map((item: any) => ({
+      const rawData: RawAvailabilityData[] = response.data.data || [];
+      const normalizedData = rawData.map((item: RawAvailabilityData) => ({
         availabilityId: item.availabilityId || item.idDisponibilidad,
         startTime: item.startTime || item.horaInicio || '00:00:00',
         endTime: item.endTime || item.horaFin || '00:00:00',
@@ -587,6 +654,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (reschedulingBooking && rescheduleDate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchRescheduleSlots(reschedulingBooking.providerId, reschedulingBooking.serviceId, rescheduleDate);
     }
   }, [reschedulingBooking, rescheduleDate]);
