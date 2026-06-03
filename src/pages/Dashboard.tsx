@@ -140,6 +140,22 @@ interface RawOfferData {
   providerUserId?: number;
 }
 
+interface RawServiceData {
+  serviceId?: number;
+  idServicio?: number;
+  id?: number;
+  nombre?: string;
+  serviceName?: string;
+  descripcion?: string;
+  serviceDescription?: string;
+  duracionMinutos?: number;
+  duration?: number;
+  capacidadMaximaConcurrente?: number;
+  capacity?: number;
+  estadoServicio?: string;
+  status?: string;
+}
+
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
   
@@ -203,10 +219,10 @@ const Dashboard: React.FC = () => {
       const response = await api.get('/api/v1/providers/me/bookings');
       const rawData: RawBookingData[] = response.data?.data || [];
       const normalizedData = rawData.map((item: RawBookingData) => ({
-        bookingId: item.bookingId || item.idReserva || item.id,
-        serviceId: item.serviceId || item.idServicio,
+        bookingId: item.bookingId || item.idReserva || item.id || Date.now(),
+        serviceId: item.serviceId || item.idServicio || 0,
         serviceName: item.serviceName || item.nombreServicio || 'Servicio Reservado',
-        availabilityId: item.availabilityId || item.idDisponibilidad,
+        availabilityId: item.availabilityId || item.idDisponibilidad || 0,
         slotDate: item.slotDate || item.fechaReserva || item.fecha || 'Sin fecha',
         startTime: item.startTime || item.horaInicio || '00:00:00',
         endTime: item.endTime || item.horaFin || '00:00:00',
@@ -227,8 +243,8 @@ const Dashboard: React.FC = () => {
       const response = await api.get('/api/v1/bookings/me');
       const rawData: RawBookingData[] = response.data?.data || [];
       const normalizedData = rawData.map((item: RawBookingData) => ({
-        bookingId: item.bookingId || item.idReserva || item.id,
-        serviceId: item.serviceId || item.idServicio,
+        bookingId: item.bookingId || item.idReserva || item.id || Date.now(),
+        serviceId: item.serviceId || item.idServicio || 0,
         serviceName: item.serviceName || item.nombreServicio || 'Servicio Reservado',
         providerId: item.providerId || item.idProveedor || 1,
         providerFullName: item.providerFullName || item.nombreProveedor || 'Proveedor',
@@ -253,11 +269,11 @@ const Dashboard: React.FC = () => {
       );
       const rawData: RawAvailabilityData[] = response.data?.data || [];
       const normalizedData = rawData.map((item: RawAvailabilityData) => ({
-        availabilityId: item.availabilityId || item.idDisponibilidad,
+        availabilityId: item.availabilityId || item.idDisponibilidad || 0,
         startTime: item.startTime || item.horaInicio || '00:00:00',
         endTime: item.endTime || item.horaFin || '00:00:00',
         remainingSlots: item.remainingSlots ?? item.cuposDisponibles ?? 0,
-        fecha: item.fecha
+        fecha: item.fecha || ''
       }));
       setAvailabilitiesList(prev => ({
         ...prev,
@@ -273,11 +289,11 @@ const Dashboard: React.FC = () => {
       const response = await api.get('/api/v1/offers');
       const rawData: RawOfferData[] = response.data?.data || [];
       const normalizedOffers = rawData.map((item: RawOfferData) => ({
-        serviceId: item.serviceId || item.idServicio || item.id,
+        serviceId: item.serviceId || item.idServicio || item.id || 0,
         serviceName: item.serviceName || item.nombreServicio || item.nombre || 'Servicio sin nombre',
         serviceDescription: item.serviceDescription || item.descripcion || 'Sin descripción',
         providerName: item.providerName || item.nombreProveedor || 'Proveedor',
-        providerId: item.providerId || item.idProveedor || item.providerUserId || 1, // Fallback to 1 if not provided
+        providerId: item.providerId || item.idProveedor || item.providerUserId || 1,
       }));
       setOffers(normalizedOffers);
     } catch (err) {
@@ -354,7 +370,7 @@ const Dashboard: React.FC = () => {
         capacidadMaximaConcurrente: newServiceCapacity
       });
 
-      const backendSrv = response.data.data as RawBookingData;
+      const backendSrv = response.data.data as RawServiceData;
       const newService: ServiceItem = {
         idServicio: backendSrv.serviceId || backendSrv.idServicio || backendSrv.id || Date.now(),
         nombre: backendSrv.nombre || backendSrv.serviceName || newServiceName,
@@ -440,7 +456,7 @@ const Dashboard: React.FC = () => {
 
       const backendData = response.data.data as RawAvailabilityData;
       const newAvail: Availability = {
-        availabilityId: backendData.availabilityId || backendData.idDisponibilidad || Date.now(),
+        availabilityId: backendData.availabilityId || backendData.idDisponibilidad || 0,
         startTime: backendData.startTime || backendData.horaInicio || formattedStart,
         endTime: backendData.endTime || backendData.horaFin || formattedEnd,
         remainingSlots: backendData.remainingSlots ?? backendData.cuposDisponibles ?? 1,
@@ -548,11 +564,11 @@ const Dashboard: React.FC = () => {
       if (foundData) {
         setCurrentProviderId(foundProviderId); // Save the correct ID for booking
         const normalizedData = foundData.map((item: RawAvailabilityData) => ({
-          availabilityId: item.availabilityId || item.idDisponibilidad,
+          availabilityId: item.availabilityId || item.idDisponibilidad || 0,
           startTime: item.startTime || item.horaInicio || '00:00:00',
           endTime: item.endTime || item.horaFin || '00:00:00',
           remainingSlots: item.remainingSlots ?? item.cuposDisponibles ?? 0,
-          fecha: item.fecha
+          fecha: item.fecha || ''
         }));
         setAvailableSlots(normalizedData);
       } else {
@@ -637,11 +653,11 @@ const Dashboard: React.FC = () => {
       );
       const rawData: RawAvailabilityData[] = response.data.data || [];
       const normalizedData = rawData.map((item: RawAvailabilityData) => ({
-        availabilityId: item.availabilityId || item.idDisponibilidad,
+        availabilityId: item.availabilityId || item.idDisponibilidad || 0,
         startTime: item.startTime || item.horaInicio || '00:00:00',
         endTime: item.endTime || item.horaFin || '00:00:00',
         remainingSlots: item.remainingSlots ?? item.cuposDisponibles ?? 0,
-        fecha: item.fecha
+        fecha: item.fecha || ''
       }));
       setRescheduleSlots(normalizedData);
     } catch (err) {
