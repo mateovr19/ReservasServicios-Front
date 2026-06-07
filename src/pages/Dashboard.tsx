@@ -203,7 +203,6 @@ const Dashboard: React.FC = () => {
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [bookingDate, setBookingDate] = useState(new Date().toISOString().split('T')[0]);
   const [availableSlots, setAvailableSlots] = useState<Availability[]>([]);
-  const [currentProviderId, setCurrentProviderId] = useState<number>(1);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loadingBooking, setLoadingBooking] = useState(false);
 
@@ -572,7 +571,7 @@ const Dashboard: React.FC = () => {
     setSuccess('');
     setLoadingBooking(true);
     try {
-      const providerId = currentProviderId;
+      const providerId = selectedOffer.providerId;
       await api.post('/api/v1/bookings', {
         providerId,
         serviceId: selectedOffer.serviceId,
