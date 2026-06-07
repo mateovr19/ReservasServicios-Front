@@ -24,7 +24,7 @@ interface Offer {
   serviceName: string;
   serviceDescription: string;
   providerName: string;
-  providerId?: number; // Might be in the response even if not documented
+  providerId: number;
 }
 
 interface Availability {
@@ -535,50 +535,25 @@ const Dashboard: React.FC = () => {
     setAvailableSlots([]);
 
     try {
-      const batchSize = 5; // Scan 5 providers at a time
-      let foundData: RawAvailabilityData[] | null = null;
-      let foundProviderId = 1;
-
-      // Scan IDs from 1 to 30
-      for (let batch = 0; batch < 6; batch++) {
-        const promises = [];
-        for (let i = 1; i <= batchSize; i++) {
-          const pid = batch * batchSize + i;
-          promises.push(
-            api.get(`/api/v1/providers/${pid}/services/${serviceId}/availabilities`, { params: { date } })
-               .then(res => ({ pid, data: (res.data?.data || []) as RawAvailabilityData[] }))
-               .catch(() => null)
-          );
-        }
-
-        const results = await Promise.all(promises);
-        const successful = results.find(r => r && r.data && r.data.length > 0);
-
-        if (successful) {
-          foundData = successful.data;
-          foundProviderId = successful.pid;
-          break; // Stop scanning once we find the valid slots!
-        }
-      }
-
-      if (foundData) {
-        setCurrentProviderId(foundProviderId); // Save the correct ID for booking
-        const normalizedData = foundData.map((item: RawAvailabilityData) => ({
-          availabilityId: item.availabilityId || item.idDisponibilidad || 0,
-          startTime: item.startTime || item.horaInicio || '00:00:00',
-          endTime: item.endTime || item.horaFin || '00:00:00',
-          remainingSlots: item.remainingSlots ?? item.cuposDisponibles ?? 0,
-          fecha: item.fecha || ''
+        const providerId = selectedOffer?.providerId || 1;
+        const response = await api.get(
+            `/api/v1/providers/${providerId}/services/${serviceId}/availabilities`,
+            { params: { date } }
+        );
+        const rawData: RawAvailabilityData[] = response.data?.data || [];
+        const normalizedData = rawData.map((item: RawAvailabilityData) => ({
+            availabilityId: item.availabilityId || item.idDisponibilidad || 0,
+            startTime: item.startTime || item.horaInicio || '00:00:00',
+            endTime: item.endTime || item.horaFin || '00:00:00',
+            remainingSlots: item.remainingSlots ?? item.cuposDisponibles ?? 0,
+            fecha: item.fecha || ''
         }));
         setAvailableSlots(normalizedData);
-      } else {
-        setAvailableSlots([]);
-      }
     } catch {
-      setError('Error al escanear horarios disponibles.');
-      setAvailableSlots([]);
+        setError('Error al obtener horarios disponibles.');
+        setAvailableSlots([]);
     } finally {
-      setLoadingSlots(false);
+        setLoadingSlots(false);
     }
   };
 
