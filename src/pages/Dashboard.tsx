@@ -528,13 +528,12 @@ const Dashboard: React.FC = () => {
   };
 
   // Query Available Hours/Slots for a client (Workaround Scanner for missing providerId)
-  const fetchAvailableSlots = async (serviceId: number, date: string) => {
+  const fetchAvailableSlots = async (serviceId: number, date: string, providerId: number) => {
     setLoadingSlots(true);
     setError('');
     setAvailableSlots([]);
 
     try {
-        const providerId = selectedOffer?.providerId || 1;
         const response = await api.get(
             `/api/v1/providers/${providerId}/services/${serviceId}/availabilities`,
             { params: { date } }
@@ -558,9 +557,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (selectedOffer && bookingDate) {
-      // Usar el escáner en lugar del ID directo
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      fetchAvailableSlots(selectedOffer.serviceId, bookingDate);
+        fetchAvailableSlots(selectedOffer.serviceId, bookingDate, selectedOffer.providerId);
     }
   }, [selectedOffer, bookingDate]);
 
