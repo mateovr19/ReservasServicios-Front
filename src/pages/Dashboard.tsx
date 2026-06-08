@@ -1274,8 +1274,8 @@ const Dashboard: React.FC = () => {
               <div className="form-group">
                 <label>Seleccionar Fecha de Reserva</label>
                 <input 
-                  type="date" 
-                  value={bookingDate}
+                  type="date"
+                  defaultValue={new Date().toISOString().split('T')[0]}
                   min={new Date().toISOString().split('T')[0]}
                   onChange={(e) => setBookingDate(e.target.value)}
                   className="modal-date-picker"
@@ -1334,7 +1334,7 @@ const Dashboard: React.FC = () => {
                 <label>Nueva Fecha</label>
                 <input 
                   type="date" 
-                  value={rescheduleDate}
+                  defaultValue={new Date().toISOString().split('T')[0]}
                   min={new Date().toISOString().split('T')[0]}
                   onChange={(e) => setRescheduleDate(e.target.value)}
                   className="modal-date-picker"
